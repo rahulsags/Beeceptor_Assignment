@@ -1,23 +1,25 @@
 import { test, expect } from '@playwright/test';
 
-test('Configure HTTP Callout using Forward Requests', async ({ page }) => {
+test('Beeceptor HTTP Callout Test', async ({ page, request }) => {
 
-  // Open your Beeceptor endpoint
   await page.goto('https://app.beeceptor.com/console/demo-rahul');
-  await page.waitForLoadState('networkidle');   
 
-  // Open Routing
-    await page.getByText('Routing').click();
+  await page.waitForLoadState('networkidle');
 
-  // Select Forward Requests
-  await page.getByText('Forward Requests').click();
+  await expect(page.locator('h1')).toContainText('demo-rahul');
 
-  // Configure target domain
-  await page
-    .getByRole('textbox', { name: /Target Domain/i })
-    .fill('https://jsonplaceholder.typicode.com');
+  const response = await request.get(
+    'https://demo-rahul.free.beeceptor.com/posts'
+  );
 
-  // Save configuration
-  await page.getByRole('button', { name: /Save/i }).click();
+  expect(response.ok()).toBeTruthy();
+  expect(response.status()).toBe(200);
+
+  const data = await response.json();
+
+  expect(Array.isArray(data)).toBeTruthy();
+  expect(data.length).toBeGreaterThan(0);
+
+  console.log(`Received ${data.length} posts`);
 
 });
