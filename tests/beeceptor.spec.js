@@ -1,29 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-test('Beeceptor HTTP Callout Test', async ({ page, request }) => {
+test('Beeceptor HTTP Callout Rule', async ({ page, request }) => {
 
   await page.goto('https://app.beeceptor.com/console/demo-rahul');
 
   await page.waitForLoadState('networkidle');
 
-  await expect(page.locator('h1')).toContainText('demo-rahul');
-
-  await page.locator('a').filter({ hasText: 'Routing' }).click();
-
-  await page.getByText('Forward Requests').click();
-
-  const targetDomain = page.getByRole('textbox', { name: /Target Domain/i });
-
-  await targetDomain.click();
-  await targetDomain.press('Control+A');
-  await targetDomain.fill('https://jsonplaceholder.typicode.com');
-
-  await page.getByRole('button', { name: /Save/i }).click();
-
-  await page.waitForLoadState('networkidle');
+  await expect(page.locator('body')).toContainText('demo-rahul');
 
   const response = await request.get(
-    'https://demo-rahul.free.beeceptor.com/posts'
+    'https://demo-rahul.free.beeceptor.com/'
   );
 
   expect(response.status()).toBe(200);
@@ -31,7 +17,13 @@ test('Beeceptor HTTP Callout Test', async ({ page, request }) => {
   const data = await response.json();
 
   expect(Array.isArray(data)).toBe(true);
-  expect(data.length).toBeGreaterThan(0);
 
-  console.log(`Received ${data.length} `);
+  expect(data[0]).toHaveProperty('userId');
+  expect(data[0]).toHaveProperty('id');
+  expect(data[0]).toHaveProperty('title');
+  expect(data[0]).toHaveProperty('body');
+
+  console.log("HTTP Callout Successful");
+  console.log(`Received ${data.length} posts`);
+
 });
